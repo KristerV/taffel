@@ -1,6 +1,6 @@
 // UI functions for button injection and status messages
-
-export function injectButton(onClickOne, onClickAll) {
+const FillMissingLessonsUI = {
+  injectButton(onClickOne, onClickAll) {
   // Check if button already exists
   if (document.getElementById('tahvel-autofill-btn')) {
     return;
@@ -53,34 +53,35 @@ export function injectButton(onClickOne, onClickAll) {
   mainContent.insertAdjacentElement('afterbegin', wrapper);
 
   console.log('Tahvel Auto-Fill: Button injected');
-}
+  },
 
-export function showStatus(message, type = 'info') {
-  const statusDiv = document.getElementById('tahvel-autofill-status');
-  if (!statusDiv) return;
+  showStatus(message, type = 'info') {
+    const statusDiv = document.getElementById('tahvel-autofill-status');
+    if (!statusDiv) return;
 
-  statusDiv.textContent = message;
-  statusDiv.className = `tahvel-autofill-status tahvel-autofill-${type}`;
-  statusDiv.style.display = 'block';
-}
+    statusDiv.textContent = message;
+    statusDiv.className = `tahvel-autofill-status tahvel-autofill-${type}`;
+    statusDiv.style.display = 'block';
+  },
 
-export function hideStatus() {
-  const statusDiv = document.getElementById('tahvel-autofill-status');
-  if (statusDiv) {
-    statusDiv.style.display = 'none';
+  hideStatus() {
+    const statusDiv = document.getElementById('tahvel-autofill-status');
+    if (statusDiv) {
+      statusDiv.style.display = 'none';
+    }
+  },
+
+  setButtonsEnabled(enabled) {
+    const nextButton = document.getElementById('tahvel-autofill-next-btn');
+    const allButton = document.getElementById('tahvel-autofill-all-btn');
+
+    if (nextButton) {
+      nextButton.disabled = !enabled;
+      nextButton.style.opacity = enabled ? '1' : '0.5';
+    }
+    if (allButton) {
+      allButton.disabled = !enabled;
+      allButton.style.opacity = enabled ? '1' : '0.5';
+    }
   }
-}
-
-export function setButtonsEnabled(enabled) {
-  const nextButton = document.getElementById('tahvel-autofill-next-btn');
-  const allButton = document.getElementById('tahvel-autofill-all-btn');
-
-  if (nextButton) {
-    nextButton.disabled = !enabled;
-    nextButton.style.opacity = enabled ? '1' : '0.5';
-  }
-  if (allButton) {
-    allButton.disabled = !enabled;
-    allButton.style.opacity = enabled ? '1' : '0.5';
-  }
-}
+};

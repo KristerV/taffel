@@ -18,10 +18,12 @@
         "features/fill-missing-lessons/api.js",
         "features/fill-missing-lessons/ui.js",
         "features/fill-missing-lessons/index.js",
+        "features/mark-all-missing/api.js",
+        "features/mark-all-missing/ui.js",
+        "features/mark-all-missing/index.js",
         "content.js"
       ],
-      "css": ["styles.css"],
-      "type": "module"
+      "css": ["styles.css"]
     }
   ],
   "icons": {

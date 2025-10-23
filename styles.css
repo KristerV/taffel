@@ -62,3 +62,28 @@
   background-color: #ff9800;
   color: white;
 }
+
+/* Mark All Missing Feature */
+.mark-all-missing-button {
+  background-color: #fbbf24;
+  color: #1f2937;
+  border: none;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 0.875rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+  border-radius: 0.25rem;
+}
+
+.mark-all-missing-button:hover:not(:disabled) {
+  background-color: #f59e0b;
+}
+
+.mark-all-missing-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
