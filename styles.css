@@ -1,0 +1,57 @@
+/* Tahvel Auto-Fill Extension Styles */
+
+.tahvel-autofill-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: background-color 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.tahvel-autofill-button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.tahvel-autofill-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.tahvel-autofill-status {
+  display: none;
+  padding: 8px 16px;
+  margin: 4px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 400px;
+}
+
+.tahvel-autofill-info {
+  background-color: #2196F3;
+  color: white;
+}
+
+.tahvel-autofill-success {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.tahvel-autofill-error {
+  background-color: #f44336;
+  color: white;
+}
+
+.tahvel-autofill-warning {
+  background-color: #ff9800;
+  color: white;
+}

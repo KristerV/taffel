@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Tahvel Auto-Fill",
+  "version": "1.0",
+  "description": "Automatically fill missing lesson dates in Tahvel journals",
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://tahvel.edu.ee/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://tahvel.edu.ee/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "icons": {
+    "48": "icon.png",
+    "96": "icon.png"
+  }
+}
