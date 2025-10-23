@@ -12,8 +12,16 @@
   "content_scripts": [
     {
       "matches": ["https://tahvel.edu.ee/*"],
-      "js": ["content.js"],
-      "css": ["styles.css"]
+      "js": [
+        "utils/common.js",
+        "features/fill-missing-lessons/constants.js",
+        "features/fill-missing-lessons/api.js",
+        "features/fill-missing-lessons/ui.js",
+        "features/fill-missing-lessons/index.js",
+        "content.js"
+      ],
+      "css": ["styles.css"],
+      "type": "module"
     }
   ],
   "icons": {
