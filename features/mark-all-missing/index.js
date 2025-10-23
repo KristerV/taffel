@@ -1,32 +1,29 @@
 // Mark All Missing Feature
 const MarkAllMissing = {
   init() {
-    // Poll for the modal every second
-    setInterval(() => {
-      const massGradeCell = document.querySelector('td.mass-grade[colspan="3"]');
-      const existingButton = document.getElementById('mark-all-missing-btn');
-
-      // If modal exists and button doesn't, inject it
-      if (massGradeCell && !existingButton) {
-        console.log('Mark-all-missing: Modal detected, injecting button');
-        MarkAllMissingUI.injectButton(() => this.handleMarkAllMissing());
-      }
-    }, 1000);
+    // Register button with shared button injection system
+    ButtonInjection.registerButton({
+      id: 'mark-all-missing-btn',
+      text: 'Märgi kõik puudujaks',
+      className: 'mark-all-missing-button',
+      onClick: () => this.handleMarkAllMissing()
+    });
   },
 
   async handleMarkAllMissing() {
-    MarkAllMissingUI.setButtonEnabled(false);
-    MarkAllMissingUI.updateButtonText('Märgin...');
+    const btnId = 'mark-all-missing-btn';
+    ButtonInjection.setButtonEnabled(btnId, false);
+    ButtonInjection.updateButtonText(btnId, 'Märgin...');
 
     try {
       // Get all students on the current page
       const students = await MarkAllMissingAPI.getAllStudentsOnCurrentPage();
 
       if (students.length === 0) {
-        MarkAllMissingUI.updateButtonText('Õpilasi ei leitud');
+        ButtonInjection.updateButtonText(btnId, 'Õpilasi ei leitud');
         setTimeout(() => {
-          MarkAllMissingUI.updateButtonText('Märgi kõik puudujaks');
-          MarkAllMissingUI.setButtonEnabled(true);
+          ButtonInjection.updateButtonText(btnId, 'Märgi kõik puudujaks');
+          ButtonInjection.setButtonEnabled(btnId, true);
         }, 2000);
         return;
       }
@@ -37,8 +34,8 @@ const MarkAllMissing = {
       );
 
       if (!confirmed) {
-        MarkAllMissingUI.updateButtonText('Märgi kõik puudujaks');
-        MarkAllMissingUI.setButtonEnabled(true);
+        ButtonInjection.updateButtonText(btnId, 'Märgi kõik puudujaks');
+        ButtonInjection.setButtonEnabled(btnId, true);
         return;
       }
 
@@ -53,21 +50,21 @@ const MarkAllMissing = {
       }
 
       // Show success message
-      MarkAllMissingUI.updateButtonText(`✓ ${markedCount} märgitud`);
+      ButtonInjection.updateButtonText(btnId, `✓ ${markedCount} märgitud`);
 
       // Reset button after 2 seconds
       setTimeout(() => {
-        MarkAllMissingUI.updateButtonText('Märgi kõik puudujaks');
-        MarkAllMissingUI.setButtonEnabled(true);
+        ButtonInjection.updateButtonText(btnId, 'Märgi kõik puudujaks');
+        ButtonInjection.setButtonEnabled(btnId, true);
       }, 2000);
 
     } catch (error) {
       console.error('Error marking students missing:', error);
-      MarkAllMissingUI.updateButtonText('Viga!');
+      ButtonInjection.updateButtonText(btnId, 'Viga!');
 
       setTimeout(() => {
-        MarkAllMissingUI.updateButtonText('Märgi kõik puudujaks');
-        MarkAllMissingUI.setButtonEnabled(true);
+        ButtonInjection.updateButtonText(btnId, 'Märgi kõik puudujaks');
+        ButtonInjection.setButtonEnabled(btnId, true);
       }, 2000);
     }
   }

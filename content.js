@@ -7,6 +7,11 @@
   // Array of features to initialize
   const features = [
     {
+      name: 'button-injection',
+      shouldInit: () => TahvelUtils.isJournalEditPage(),
+      init: () => ButtonInjection.init()
+    },
+    {
       name: 'fill-missing-lessons',
       shouldInit: () => TahvelUtils.isJournalEditPage(),
       init: () => FillMissingLessons.init()
@@ -15,6 +20,11 @@
       name: 'mark-all-missing',
       shouldInit: () => TahvelUtils.isJournalEditPage(),
       init: () => MarkAllMissing.init()
+    },
+    {
+      name: 'mark-missing-tinkr',
+      shouldInit: () => TahvelUtils.isJournalEditPage(),
+      init: () => MarkMissingTinkr.init()
     }
     // Add more features here as they are developed
   ];

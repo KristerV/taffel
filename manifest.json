@@ -14,6 +14,7 @@
       "matches": ["https://tahvel.edu.ee/*"],
       "js": [
         "utils/common.js",
+        "utils/button-injection.js",
         "features/fill-missing-lessons/constants.js",
         "features/fill-missing-lessons/api.js",
         "features/fill-missing-lessons/ui.js",
@@ -21,6 +22,11 @@
         "features/mark-all-missing/api.js",
         "features/mark-all-missing/ui.js",
         "features/mark-all-missing/index.js",
+        "features/mark-missing-tinkr/matcher.js",
+        "features/mark-missing-tinkr/parser.js",
+        "features/mark-missing-tinkr/api.js",
+        "features/mark-missing-tinkr/ui.js",
+        "features/mark-missing-tinkr/index.js",
         "content.js"
       ],
       "css": ["styles.css"]
