@@ -32,29 +32,51 @@ function injectButton() {
     return;
   }
 
-  // Find a good place to inject the button (top of the page)
-  const header = document.querySelector('.page-header, .view-header, md-toolbar, .md-toolbar-tools');
+  // Find the main content area
+  const mainContent = document.getElementById('main-content');
 
-  if (!header) {
-    console.log('Tahvel Auto-Fill: Could not find header to inject button');
+  if (!mainContent) {
+    console.log('Tahvel Auto-Fill: Could not find main-content to inject button');
     return;
   }
 
-  // Create button
-  const button = document.createElement('button');
-  button.id = 'tahvel-autofill-btn';
-  button.className = 'tahvel-autofill-button';
-  button.textContent = 'Fill Dates';
-  button.onclick = handleFillDates;
+  // Create wrapper div
+  const wrapper = document.createElement('div');
+  wrapper.id = 'tahvel-autofill-wrapper';
+  wrapper.className = 'tahvel-autofill-wrapper';
+
+  // Create label
+  const label = document.createElement('span');
+  label.textContent = 'Add missing lessons: ';
+  label.style.marginRight = '0.5rem';
+  label.style.fontWeight = '500';
+
+  // Create "one" button
+  const nextButton = document.createElement('button');
+  nextButton.id = 'tahvel-autofill-next-btn';
+  nextButton.className = 'tahvel-autofill-button';
+  nextButton.textContent = 'one';
+  nextButton.onclick = () => handleFillDates(1);
+
+  // Create "all" button
+  const allButton = document.createElement('button');
+  allButton.id = 'tahvel-autofill-all-btn';
+  allButton.className = 'tahvel-autofill-button';
+  allButton.textContent = 'all';
+  allButton.style.marginLeft = '0.5rem';
+  allButton.onclick = () => handleFillDates(null);
 
   // Create status div
   const statusDiv = document.createElement('div');
   statusDiv.id = 'tahvel-autofill-status';
   statusDiv.className = 'tahvel-autofill-status';
 
-  // Insert button and status
-  header.appendChild(button);
-  header.appendChild(statusDiv);
+  // Assemble and insert
+  wrapper.appendChild(label);
+  wrapper.appendChild(nextButton);
+  wrapper.appendChild(allButton);
+  wrapper.appendChild(statusDiv);
+  mainContent.insertAdjacentElement('afterbegin', wrapper);
 
   console.log('Tahvel Auto-Fill: Button injected');
 }
@@ -89,17 +111,23 @@ function hideStatus() {
   }
 }
 
-// Disable/enable button
-function setButtonEnabled(enabled) {
-  const button = document.getElementById('tahvel-autofill-btn');
-  if (button) {
-    button.disabled = !enabled;
-    button.style.opacity = enabled ? '1' : '0.5';
+// Disable/enable buttons
+function setButtonsEnabled(enabled) {
+  const nextButton = document.getElementById('tahvel-autofill-next-btn');
+  const allButton = document.getElementById('tahvel-autofill-all-btn');
+
+  if (nextButton) {
+    nextButton.disabled = !enabled;
+    nextButton.style.opacity = enabled ? '1' : '0.5';
+  }
+  if (allButton) {
+    allButton.disabled = !enabled;
+    allButton.style.opacity = enabled ? '1' : '0.5';
   }
 }
 
 // Main handler
-async function handleFillDates() {
+async function handleFillDates(limit = null) {
   const journalId = getJournalId();
   const token = getXSRFToken();
 
@@ -113,7 +141,7 @@ async function handleFillDates() {
     return;
   }
 
-  setButtonEnabled(false);
+  setButtonsEnabled(false);
   showStatus('Fetching data...', 'info');
 
   try {
@@ -194,23 +222,26 @@ async function handleFillDates() {
 
     if (missingDates.length === 0) {
       showStatus('No missing dates found!', 'success');
-      setButtonEnabled(true);
+      setButtonsEnabled(true);
       setTimeout(hideStatus, 3000);
       return;
     }
 
-    // Step 7: Confirm with user
+    // Step 7: Limit to specified number if provided
+    const datesToAdd = limit ? missingDates.slice(0, limit) : missingDates;
+
+    // Confirm with user
     const confirmed = confirm(
       `Found ${missingDates.length} missing lesson dates.\n\n` +
-      `This will create ${missingDates.length} journal entries.\n\n` +
-      `First date: ${new Date(missingDates[0].date).toLocaleDateString()}\n` +
-      `Last date: ${new Date(missingDates[missingDates.length - 1].date).toLocaleDateString()}\n\n` +
+      `This will create ${datesToAdd.length} journal ${datesToAdd.length === 1 ? 'entry' : 'entries'}.\n\n` +
+      `First date: ${new Date(datesToAdd[0].date).toLocaleDateString()}\n` +
+      (datesToAdd.length > 1 ? `Last date: ${new Date(datesToAdd[datesToAdd.length - 1].date).toLocaleDateString()}\n\n` : '\n') +
       `Continue?`
     );
 
     if (!confirmed) {
       showStatus('Cancelled', 'info');
-      setButtonEnabled(true);
+      setButtonsEnabled(true);
       setTimeout(hideStatus, 2000);
       return;
     }
@@ -219,11 +250,11 @@ async function handleFillDates() {
     let successCount = 0;
     let failCount = 0;
 
-    for (let i = 0; i < missingDates.length; i++) {
-      const { date, startLessonNr, lessonCount } = missingDates[i];
+    for (let i = 0; i < datesToAdd.length; i++) {
+      const { date, startLessonNr, lessonCount } = datesToAdd[i];
       const dateStr = new Date(date).toLocaleDateString();
 
-      showStatus(`Inserting ${i + 1}/${missingDates.length}: ${dateStr}...`, 'info');
+      showStatus(`Inserting ${i + 1}/${datesToAdd.length}: ${dateStr}...`, 'info');
 
       try {
         const payload = createEntryPayload(date, startLessonNr, lessonCount, students, teacherId);
@@ -241,12 +272,12 @@ async function handleFillDates() {
 
     // Step 9: Show results
     if (failCount === 0) {
-      showStatus(`Success! Inserted ${successCount} lessons.`, 'success');
+      showStatus(`Success! Inserted ${successCount} ${successCount === 1 ? 'lesson' : 'lessons'}.`, 'success');
     } else {
       showStatus(`Completed: ${successCount} success, ${failCount} failed.`, 'warning');
     }
 
-    setButtonEnabled(true);
+    setButtonsEnabled(true);
 
     // Reload page after 2 seconds
     setTimeout(() => {
@@ -256,7 +287,7 @@ async function handleFillDates() {
   } catch (error) {
     console.error('Error:', error);
     showStatus(`Error: ${error.message}`, 'error');
-    setButtonEnabled(true);
+    setButtonsEnabled(true);
   }
 }
 
