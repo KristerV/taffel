@@ -68,11 +68,21 @@ const NavbarButtonsUI = {
     link.className = 'tahvel-navbar-button';
     link.href = config.href;
 
-    // Create button content with icon and text
-    link.innerHTML = `
-      <span class="tahvel-navbar-button-icon">${config.icon}</span>
-      <span class="tahvel-navbar-button-text">${config.text}</span>
-    `;
+    // Create icon span with SVG (using DOMParser to avoid innerHTML)
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'tahvel-navbar-button-icon';
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(config.icon, 'image/svg+xml');
+    const svgElement = svgDoc.documentElement;
+    iconSpan.appendChild(svgElement);
+
+    // Create text span
+    const textSpan = document.createElement('span');
+    textSpan.className = 'tahvel-navbar-button-text';
+    textSpan.textContent = config.text;
+
+    link.appendChild(iconSpan);
+    link.appendChild(textSpan);
 
     // Highlight active button based on current URL
     if (window.location.hash === config.href ||

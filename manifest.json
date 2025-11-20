@@ -3,6 +3,14 @@
   "name": "Tahvel Auto-Fill",
   "version": "1.0",
   "description": "Automatically fill missing lesson dates in Tahvel journals",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tahvel-autofill@krister.ee",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
   "permissions": [
     "activeTab"
   ],
@@ -35,7 +43,8 @@
     }
   ],
   "icons": {
-    "48": "icon.png",
-    "96": "icon.png"
+    "48": "icon-48.png",
+    "96": "icon.png",
+    "128": "icon-128.png"
   }
 }
