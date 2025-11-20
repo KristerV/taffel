@@ -28,14 +28,14 @@ const FillMissingLessonsUI = {
   // Create "one" button
   const nextButton = document.createElement('button');
   nextButton.id = 'tahvel-autofill-next-btn';
-  nextButton.className = 'tahvel-autofill-button';
+  nextButton.className = 'tahvel-brand-button tahvel-autofill-button';
   nextButton.textContent = 'one';
   nextButton.onclick = onClickOne;
 
   // Create "all" button
   const allButton = document.createElement('button');
   allButton.id = 'tahvel-autofill-all-btn';
-  allButton.className = 'tahvel-autofill-button';
+  allButton.className = 'tahvel-brand-button tahvel-autofill-button';
   allButton.textContent = 'all';
   allButton.style.marginLeft = '0.5rem';
   allButton.onclick = onClickAll;

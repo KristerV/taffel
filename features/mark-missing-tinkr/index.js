@@ -5,7 +5,7 @@ const MarkMissingTinkr = {
     ButtonInjection.registerButton({
       id: 'mark-missing-tinkr-btn',
       text: 'Märgi Tinkr puudujad',
-      className: 'mark-missing-tinkr-button',
+      className: 'tahvel-brand-button mark-missing-tinkr-button',
       onClick: () => this.handleMarkMissingTinkr()
     });
   },

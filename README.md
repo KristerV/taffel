@@ -94,6 +94,25 @@ The extension automatically determines the starting lesson number based on the e
 
 ## Development
 
+### Color Scheme
+
+The extension uses a consistent amber/yellow color palette as its brand color:
+
+- **Primary Brand Color**: `#fbbf24` (amber-400)
+- **Hover State**: `#f59e0b` (amber-500)
+- **Active State**: `#d97706` (amber-600)
+- **Active Hover**: `#b45309` (amber-700)
+- **Text Color**: `#1f2937` (gray-800)
+- **Active Text**: `#ffffff` (white)
+
+**Status Colors:**
+- **Info**: `#2196F3` (blue)
+- **Success**: `#4CAF50` (green)
+- **Error**: `#f44336` (red)
+- **Warning**: `#ff9800` (orange)
+
+All buttons and UI elements should follow this color scheme for consistency.
+
 ### File Structure
 
 ```

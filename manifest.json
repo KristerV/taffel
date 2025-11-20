@@ -27,6 +27,8 @@
         "features/mark-missing-tinkr/api.js",
         "features/mark-missing-tinkr/ui.js",
         "features/mark-missing-tinkr/index.js",
+        "features/navbar-buttons/ui.js",
+        "features/navbar-buttons/index.js",
         "content.js"
       ],
       "css": ["styles.css"]

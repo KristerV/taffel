@@ -1,5 +1,45 @@
 /* Tahvel Auto-Fill Extension Styles */
 
+/* Brand Colors */
+:root {
+  --brand-primary: #fbbf24;
+  --brand-hover: #f59e0b;
+  --brand-active: #d97706;
+  --brand-active-hover: #b45309;
+  --brand-light: #fef3c7;
+  --text-primary: #1f2937;
+  --text-white: #ffffff;
+  --status-info: #2196F3;
+  --status-success: #4CAF50;
+  --status-error: #f44336;
+  --status-warning: #ff9800;
+}
+
+/* Base Brand Button */
+.tahvel-brand-button {
+  background-color: var(--brand-primary);
+  color: var(--text-primary);
+  border: none;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 0.875rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+  border-radius: 0.25rem;
+}
+
+.tahvel-brand-button:hover:not(:disabled) {
+  background-color: var(--brand-hover);
+}
+
+.tahvel-brand-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .tahvel-autofill-wrapper {
   position: relative;
   padding: 1.25rem;
@@ -11,26 +51,6 @@
 
 .tahvel-autofill-button {
   position: relative;
-  background-color: #fbbf24;
-  color: #1f2937;
-  border: none;
-  padding: 0.5rem 1rem;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 0.875rem;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.3s;
-}
-
-.tahvel-autofill-button:hover:not(:disabled) {
-  background-color: #f59e0b;
-}
-
-.tahvel-autofill-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
 }
 
 .tahvel-autofill-status {
@@ -44,72 +64,113 @@
 }
 
 .tahvel-autofill-info {
-  background-color: #2196F3;
-  color: white;
+  background-color: var(--status-info);
+  color: var(--text-white);
 }
 
 .tahvel-autofill-success {
-  background-color: #4CAF50;
-  color: white;
+  background-color: var(--status-success);
+  color: var(--text-white);
 }
 
 .tahvel-autofill-error {
-  background-color: #f44336;
-  color: white;
+  background-color: var(--status-error);
+  color: var(--text-white);
 }
 
 .tahvel-autofill-warning {
-  background-color: #ff9800;
-  color: white;
+  background-color: var(--status-warning);
+  color: var(--text-white);
 }
 
 /* Mark All Missing Feature */
 .mark-all-missing-button {
-  background-color: #fbbf24;
-  color: #1f2937;
-  border: none;
-  padding: 0.5rem 1rem;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 0.875rem;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.3s;
-  border-radius: 0.25rem;
-}
-
-.mark-all-missing-button:hover:not(:disabled) {
-  background-color: #f59e0b;
-}
-
-.mark-all-missing-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+  /* Uses tahvel-brand-button class */
 }
 
 /* Mark Missing Tinkr Feature */
 .mark-missing-tinkr-button {
-  background-color: #fbbf24;
-  color: #1f2937;
-  border: none;
-  padding: 0.5rem 1rem;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 0.875rem;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.3s;
-  border-radius: 0.25rem;
   margin-left: 0.5rem;
+  /* Uses tahvel-brand-button class */
 }
 
-.mark-missing-tinkr-button:hover:not(:disabled) {
-  background-color: #f59e0b;
+/* Navbar Buttons Feature */
+.tahvel-navbar-buttons-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 2rem;
+  height: 100%;
 }
 
-.mark-missing-tinkr-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+.tahvel-navbar-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid var(--brand-primary);
+  white-space: nowrap;
+}
+
+.tahvel-navbar-button:visited {
+  color: var(--text-primary);
+}
+
+.tahvel-navbar-button:hover {
+  background-color: var(--brand-light);
+  border-color: var(--brand-primary);
+  color: var(--text-primary);
+}
+
+.tahvel-navbar-button.active {
+  background-color: var(--brand-primary);
+  color: var(--text-primary);
+  border-color: var(--brand-primary);
+}
+
+.tahvel-navbar-button.active:hover {
+  background-color: var(--brand-hover);
+  border-color: var(--brand-hover);
+}
+
+.tahvel-navbar-button-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.tahvel-navbar-button-text {
+  line-height: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .tahvel-navbar-buttons-container {
+    margin-left: 1rem;
+    gap: 0.25rem;
+  }
+
+  .tahvel-navbar-button {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .tahvel-navbar-button-text {
+    display: none;
+  }
+
+  .tahvel-navbar-button {
+    padding: 0.5rem;
+  }
 }

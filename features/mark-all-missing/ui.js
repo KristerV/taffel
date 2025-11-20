@@ -20,7 +20,7 @@ const MarkAllMissingUI = {
     // Create button
     const button = document.createElement('button');
     button.id = 'mark-all-missing-btn';
-    button.className = 'mark-all-missing-button';
+    button.className = 'tahvel-brand-button mark-all-missing-button';
     button.textContent = 'Märgi kõik puudujaks';
     button.onclick = onClick;
 

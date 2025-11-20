@@ -7,6 +7,11 @@
   // Array of features to initialize
   const features = [
     {
+      name: 'navbar-buttons',
+      shouldInit: () => true, // Always show navbar buttons
+      init: () => NavbarButtons.init()
+    },
+    {
       name: 'button-injection',
       shouldInit: () => TahvelUtils.isJournalEditPage(),
       init: () => ButtonInjection.init()
