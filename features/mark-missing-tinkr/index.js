@@ -13,7 +13,7 @@ const MarkMissingTinkr = {
   handleMarkMissingTinkr() {
     // Show popup for Tinkr data input
     MarkMissingTinkrUI.showPopup(
-      (data, threshold) => this.processTinkrData(data, threshold),
+      (data, allowedMissing, minRecent) => this.processTinkrData(data, allowedMissing, minRecent),
       () => {
         // Cancel callback
         console.log('Tinkr marking cancelled');
@@ -21,7 +21,7 @@ const MarkMissingTinkr = {
     );
   },
 
-  async processTinkrData(tinkrText, allowedMissing) {
+  async processTinkrData(tinkrText, allowedMissing, minRecent) {
     const btnId = 'mark-missing-tinkr-btn';
 
     try {
@@ -44,9 +44,9 @@ const MarkMissingTinkr = {
       }
 
       // Show parsing results
-      const toMark = TinkrParser.filterShouldBeMarkedMissing(students, allowedMissing);
+      const toMark = TinkrParser.filterShouldBeMarkedMissing(students, allowedMissing, minRecent);
       MarkMissingTinkrUI.showStatus(
-        `Leitud ${students.length} õpilast, neist ${toMark.length} tuleb märkida puudujaks (lubatud: ${allowedMissing} tundi). Märgin...`,
+        `Leitud ${students.length} õpilast, neist ${toMark.length} tuleb märkida puudujaks. Märgin...`,
         'info'
       );
 
@@ -58,6 +58,7 @@ const MarkMissingTinkr = {
       const results = await MarkMissingTinkrAPI.matchAndMarkStudents(
         students,
         allowedMissing,
+        minRecent,
         (progress) => {
           // Update status during processing
           MarkMissingTinkrUI.showStatus(

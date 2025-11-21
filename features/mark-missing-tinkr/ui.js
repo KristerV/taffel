@@ -43,7 +43,7 @@ const MarkMissingTinkrUI = {
       </p>
       <textarea
         id="tinkr-data-textarea"
-        placeholder="Status     Help     Email     Current Activity     Progress     Percentage&#10;Offline&#10;    —     martin.veeberg@tptlive.ee     —&#10;149/149&#10;    100%&#10;..."
+        placeholder="Status     Help     Email     Current Activity     Progress     Last 3 Days     Percentage&#10;Offline&#10;    —     martin.veeberg@tptlive.ee     —&#10;149/149&#10;    0     100%&#10;..."
         style="
           width: 100%;
           height: 250px;
@@ -56,27 +56,51 @@ const MarkMissingTinkrUI = {
           box-sizing: border-box;
         "
       ></textarea>
-      <div style="margin-top: 15px; display: flex; align-items: center; gap: 10px;">
-        <label style="font-size: 14px; color: #666;">
-          Lubatud puuduolevaid tunde:
-        </label>
-        <input
-          id="tinkr-threshold-input"
-          type="number"
-          value="3"
-          min="0"
-          max="50"
-          style="
-            width: 60px;
-            padding: 6px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-          "
-        />
-        <span style="font-size: 13px; color: #999;">
-          (kokku - X tundi)
-        </span>
+      <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label style="font-size: 14px; color: #666; min-width: 200px;">
+            Lubatud puuduolevaid tunde (kokku):
+          </label>
+          <input
+            id="tinkr-allowed-missing-input"
+            type="number"
+            value="3"
+            min="0"
+            max="50"
+            style="
+              width: 60px;
+              padding: 6px 10px;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              font-size: 14px;
+            "
+          />
+          <span style="font-size: 13px; color: #999;">
+            (kokku - X tundi)
+          </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label style="font-size: 14px; color: #666; min-width: 200px;">
+            Min tunde viimase 3 päeva:
+          </label>
+          <input
+            id="tinkr-min-recent-input"
+            type="number"
+            value="1"
+            min="0"
+            max="50"
+            style="
+              width: 60px;
+              padding: 6px 10px;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              font-size: 14px;
+            "
+          />
+          <span style="font-size: 13px; color: #999;">
+            (vähemalt X tundi)
+          </span>
+        </div>
       </div>
       <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
         <button
@@ -121,16 +145,18 @@ const MarkMissingTinkrUI = {
 
     // Event listeners
     const textarea = document.getElementById('tinkr-data-textarea');
-    const thresholdInput = document.getElementById('tinkr-threshold-input');
+    const allowedMissingInput = document.getElementById('tinkr-allowed-missing-input');
+    const minRecentInput = document.getElementById('tinkr-min-recent-input');
     const submitBtn = document.getElementById('tinkr-submit-btn');
     const cancelBtn = document.getElementById('tinkr-cancel-btn');
 
     submitBtn.onclick = () => {
       const data = textarea.value.trim();
-      const threshold = parseInt(thresholdInput.value) || 3;
+      const allowedMissing = parseInt(allowedMissingInput.value) || 3;
+      const minRecent = parseInt(minRecentInput.value) || 1;
 
       if (data) {
-        onSubmit(data, threshold);
+        onSubmit(data, allowedMissing, minRecent);
       } else {
         this.showStatus('Palun sisesta Tinkr andmed', 'error');
       }
@@ -198,6 +224,7 @@ Kokku: ${results.total} õpilast Tahvelis
 Sobivad: ${results.matched} leitud Tinkrist
 Märgitud: ${results.marked} uut
 Juba märgitud: ${results.skipped}
+${results.notInTinkr.length > 0 ? `\nTahvelis aga mitte Tinkris: ${results.notInTinkr.length}` : ''}
 ${results.notFound.length > 0 ? `\nTinkris aga mitte Tahvelis: ${results.notFound.length}` : ''}
     `.trim();
 
@@ -205,6 +232,12 @@ ${results.notFound.length > 0 ? `\nTinkris aga mitte Tahvelis: ${results.notFoun
 
     // Log details to console
     console.log('Tinkr marking results:', results);
+    if (results.notInTinkr.length > 0) {
+      console.log('Students in Tahvel but not in Tinkr:', results.notInTinkr);
+    }
+    if (results.notFound.length > 0) {
+      console.log('Students in Tinkr but not in Tahvel:', results.notFound);
+    }
 
     // Close popup after 3 seconds
     setTimeout(() => {

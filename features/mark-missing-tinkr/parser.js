@@ -51,7 +51,26 @@ const TinkrParser = {
         continue;
       }
 
-      // Detect percentage (e.g., "100%")
+      // Detect "Last 3 Days + Percentage" on same line (e.g., "0     42%" or "7     97%")
+      const combinedMatch = trimmed.match(/^(\d+)\s+(\d+)%$/);
+      if (combinedMatch && currentStudent && currentStudent.total) {
+        currentStudent.lastThreeDays = parseInt(combinedMatch[1]);
+        currentStudent.percentage = parseInt(combinedMatch[2]);
+        // We have all data for this student, add to array
+        students.push(currentStudent);
+        currentStudent = null;
+        continue;
+      }
+
+      // Detect "Last 3 Days" value alone (just a number, comes after progress)
+      // Only match if we already have progress data and don't have lastThreeDays yet
+      const lastThreeDaysMatch = trimmed.match(/^(\d+)$/);
+      if (lastThreeDaysMatch && currentStudent && currentStudent.total && currentStudent.lastThreeDays === undefined) {
+        currentStudent.lastThreeDays = parseInt(lastThreeDaysMatch[1]);
+        continue;
+      }
+
+      // Detect percentage alone (e.g., "100%")
       const percentMatch = trimmed.match(/^(\d+)%$/);
       if (percentMatch && currentStudent) {
         currentStudent.percentage = parseInt(percentMatch[1]);
@@ -70,15 +89,29 @@ const TinkrParser = {
     console.log('TinkrParser: Parsed students:', students.length);
     console.log('TinkrParser: First 3 students:', students.slice(0, 3));
 
-    return students;
+    // Deduplicate by normalized email (keep first occurrence only)
+    const seen = new Set();
+    const deduplicated = students.filter(student => {
+      const normalized = student.email.toLowerCase().replace(/[^a-z]/g, '');
+      if (seen.has(normalized)) {
+        console.log(`TinkrParser: Skipping duplicate: ${student.email} (already have this student)`);
+        return false;
+      }
+      seen.add(normalized);
+      return true;
+    });
+
+    console.log('TinkrParser: After deduplication:', deduplicated.length);
+
+    return deduplicated;
   },
 
   // Filter students who should be marked missing
   // Rules:
   // 1. Not online
-  // 2. Progress < (total - allowedMissing) lessons
-  filterShouldBeMarkedMissing(students, allowedMissing = 3) {
-    console.log(`TinkrParser: Filtering students to mark missing (allowed missing: ${allowedMissing})`);
+  // 2. Progress < (total - allowedMissing) lessons AND lastThreeDays < minRecentLessons
+  filterShouldBeMarkedMissing(students, allowedMissing = 3, minRecentLessons = 1) {
+    console.log(`TinkrParser: Filtering students to mark missing (allowed missing: ${allowedMissing}, min recent: ${minRecentLessons})`);
     const filtered = students.filter(student => {
       // Must be offline
       if (student.status === 'Online') {
@@ -92,10 +125,22 @@ const TinkrParser = {
         return false;
       }
 
-      // Must have less than (total - allowedMissing) lessons completed
+      // Must have lastThreeDays data
+      if (student.lastThreeDays === undefined) {
+        console.log('  - Skipping (no Last 3 Days data):', student.email);
+        return false;
+      }
+
+      // Check overall progress
       const requiredLessons = student.total - allowedMissing;
-      const shouldMark = student.completed < requiredLessons;
-      console.log(`  - ${student.email}: ${student.completed}/${student.total} (required: ${requiredLessons}) -> ${shouldMark ? 'MARK' : 'SKIP'}`);
+      const overallBad = student.completed < requiredLessons;
+
+      // Check recent work
+      const recentBad = student.lastThreeDays < minRecentLessons;
+
+      // Mark if BOTH overall AND recent are bad
+      const shouldMark = overallBad && recentBad;
+      console.log(`  - ${student.email}: ${student.completed}/${student.total} (need: ${requiredLessons}), Last 3 Days: ${student.lastThreeDays} (need: ${minRecentLessons}) -> ${shouldMark ? 'MARK' : 'SKIP'}`);
       return shouldMark;
     });
 

@@ -48,13 +48,13 @@ const MarkMissingTinkrAPI = {
   },
 
   // Match Tahvel students with Tinkr students and mark missing
-  async matchAndMarkStudents(tinkrStudents, allowedMissing, onProgress) {
+  async matchAndMarkStudents(tinkrStudents, allowedMissing, minRecent, onProgress) {
     const tahvelStudents = await this.getTahvelStudents();
     console.log('MarkMissingTinkrAPI: Tahvel students:', tahvelStudents.length);
     console.log('MarkMissingTinkrAPI: First 3 Tahvel students:', tahvelStudents.slice(0, 3).map(s => s.name));
 
     // Filter Tinkr students who should be marked missing
-    const tinkrToMark = TinkrParser.filterShouldBeMarkedMissing(tinkrStudents, allowedMissing);
+    const tinkrToMark = TinkrParser.filterShouldBeMarkedMissing(tinkrStudents, allowedMissing, minRecent);
     console.log('MarkMissingTinkrAPI: Tinkr students to mark:', tinkrToMark.length);
     console.log('MarkMissingTinkrAPI: Tinkr emails to mark:', tinkrToMark.map(s => s.email));
 
@@ -63,7 +63,8 @@ const MarkMissingTinkrAPI = {
       matched: 0,
       marked: 0,
       skipped: 0,
-      notFound: [],
+      notFound: [],           // Tinkr students to mark that weren't found in Tahvel
+      notInTinkr: [],         // Tahvel students not found in Tinkr at all
       details: []
     };
 
@@ -72,7 +73,7 @@ const MarkMissingTinkrAPI = {
 
     // Match each Tahvel student with Tinkr data
     for (const tahvelStudent of tahvelStudents) {
-      // Find matching Tinkr student
+      // Find matching Tinkr student (in students to mark)
       const match = TinkrMatcher.findTinkrStudent(
         tahvelStudent.name,
         tinkrToMark
@@ -90,6 +91,7 @@ const MarkMissingTinkrAPI = {
             tahvelName: tahvelStudent.name,
             tinkrEmail: match.tinkrStudent.email,
             progress: `${match.tinkrStudent.completed}/${match.tinkrStudent.total}`,
+            lastThreeDays: match.tinkrStudent.lastThreeDays,
             matchMethod: match.matchResult.method,
             similarity: match.matchResult.similarity,
             action: 'marked'
@@ -100,6 +102,7 @@ const MarkMissingTinkrAPI = {
             tahvelName: tahvelStudent.name,
             tinkrEmail: match.tinkrStudent.email,
             progress: `${match.tinkrStudent.completed}/${match.tinkrStudent.total}`,
+            lastThreeDays: match.tinkrStudent.lastThreeDays,
             matchMethod: match.matchResult.method,
             similarity: match.matchResult.similarity,
             action: 'already_marked'
@@ -113,6 +116,53 @@ const MarkMissingTinkrAPI = {
 
         // Small delay between clicks
         await new Promise(resolve => setTimeout(resolve, 50));
+      } else {
+        // Check if student is in Tinkr at all (not just in the "to mark" list)
+        const inTinkrAtAll = TinkrMatcher.findTinkrStudent(
+          tahvelStudent.name,
+          tinkrStudents
+        );
+
+        if (!inTinkrAtAll) {
+          // Student not in Tinkr at all - mark as missing
+          const marked = this.markStudentMissing(tahvelStudent);
+
+          if (marked) {
+            results.marked++;
+            results.details.push({
+              tahvelName: tahvelStudent.name,
+              tinkrEmail: null,
+              progress: null,
+              lastThreeDays: null,
+              matchMethod: 'not_in_tinkr',
+              similarity: null,
+              action: 'marked'
+            });
+          } else {
+            results.skipped++;
+            results.details.push({
+              tahvelName: tahvelStudent.name,
+              tinkrEmail: null,
+              progress: null,
+              lastThreeDays: null,
+              matchMethod: 'not_in_tinkr',
+              similarity: null,
+              action: 'already_marked'
+            });
+          }
+
+          results.notInTinkr.push({
+            name: tahvelStudent.name
+          });
+
+          // Progress callback
+          if (onProgress) {
+            onProgress(results);
+          }
+
+          // Small delay between clicks
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
       }
     }
 

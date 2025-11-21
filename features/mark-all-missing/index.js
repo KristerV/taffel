@@ -5,7 +5,7 @@ const MarkAllMissing = {
     ButtonInjection.registerButton({
       id: 'mark-all-missing-btn',
       text: 'Märgi kõik puudujaks',
-      className: 'mark-all-missing-button',
+      className: 'tahvel-brand-button mark-all-missing-button',
       onClick: () => this.handleMarkAllMissing()
     });
   },
