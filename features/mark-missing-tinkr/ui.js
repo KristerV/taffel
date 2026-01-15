@@ -43,7 +43,7 @@ const MarkMissingTinkrUI = {
       </p>
       <textarea
         id="tinkr-data-textarea"
-        placeholder="Status     Help     Email     Current Activity     Progress     Last 3 Days     Percentage&#10;Offline&#10;    —     martin.veeberg@tptlive.ee     —&#10;149/149&#10;    0     100%&#10;..."
+        placeholder="Status    Email    Progress    Last 3 Days    Percentage&#10;Offline    martin.veeberg@tptlive.ee    223/224    25    100%&#10;Offline    gert.talva@tptlive.ee    174/224    0    78%&#10;..."
         style="
           width: 100%;
           height: 250px;

@@ -1,89 +1,56 @@
 // Parser for Tinkr student data
 const TinkrParser = {
   // Parse Tinkr text data into structured format
+  // Expected format (tab-separated):
+  // Status    Email    Progress    Last 3 Days    Percentage
+  // Offline    name@domain.com    223/224    0    100%
   parse(tinkrText) {
     console.log('TinkrParser: Starting parse, text length:', tinkrText.length);
     const students = [];
     const lines = tinkrText.split('\n');
     console.log('TinkrParser: Total lines:', lines.length);
 
-    let currentStudent = null;
-
     for (const line of lines) {
       const trimmed = line.trim();
 
-      // Skip empty lines and headers
-      if (!trimmed || trimmed === 'Student List' || trimmed.includes('Status')) {
+      // Skip empty lines and header
+      if (!trimmed || trimmed.startsWith('Status')) {
         continue;
       }
 
-      // Detect status lines (Online/Offline)
-      if (trimmed === 'Online' || trimmed === 'Offline') {
-        if (currentStudent) {
-          students.push(currentStudent);
-        }
-        currentStudent = { status: trimmed };
+      // Split by tabs or multiple spaces
+      const parts = trimmed.split(/\t+|\s{2,}/).map(p => p.trim()).filter(p => p);
+
+      // Expected: [Status, Email, Progress, Last3Days, Percentage]
+      if (parts.length < 5) {
+        console.log('TinkrParser: Skipping invalid line:', trimmed);
         continue;
       }
 
-      // Skip help column (—)
-      if (trimmed === '—') {
+      const [status, email, progress, lastThreeDays, percentage] = parts;
+
+      // Parse progress (e.g., "223/224")
+      const progressMatch = progress.match(/^(\d+)\/(\d+)$/);
+      if (!progressMatch) {
+        console.log('TinkrParser: Invalid progress format:', progress);
         continue;
       }
 
-      // Detect email (contains @)
-      if (trimmed.includes('@')) {
-        if (currentStudent) {
-          // Extract just the email part (remove em dashes, spaces, etc)
-          const emailMatch = trimmed.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
-          if (emailMatch) {
-            currentStudent.email = emailMatch[1];
-          }
-        }
+      // Parse percentage (e.g., "100%")
+      const percentMatch = percentage.match(/^(\d+)%$/);
+      if (!percentMatch) {
+        console.log('TinkrParser: Invalid percentage format:', percentage);
         continue;
       }
 
-      // Detect progress (e.g., "149/149" or "148/149")
-      const progressMatch = trimmed.match(/^(\d+)\/(\d+)$/);
-      if (progressMatch && currentStudent) {
-        currentStudent.completed = parseInt(progressMatch[1]);
-        currentStudent.total = parseInt(progressMatch[2]);
-        continue;
-      }
-
-      // Detect "Last 3 Days + Percentage" on same line (e.g., "0     42%" or "7     97%")
-      const combinedMatch = trimmed.match(/^(\d+)\s+(\d+)%$/);
-      if (combinedMatch && currentStudent && currentStudent.total) {
-        currentStudent.lastThreeDays = parseInt(combinedMatch[1]);
-        currentStudent.percentage = parseInt(combinedMatch[2]);
-        // We have all data for this student, add to array
-        students.push(currentStudent);
-        currentStudent = null;
-        continue;
-      }
-
-      // Detect "Last 3 Days" value alone (just a number, comes after progress)
-      // Only match if we already have progress data and don't have lastThreeDays yet
-      const lastThreeDaysMatch = trimmed.match(/^(\d+)$/);
-      if (lastThreeDaysMatch && currentStudent && currentStudent.total && currentStudent.lastThreeDays === undefined) {
-        currentStudent.lastThreeDays = parseInt(lastThreeDaysMatch[1]);
-        continue;
-      }
-
-      // Detect percentage alone (e.g., "100%")
-      const percentMatch = trimmed.match(/^(\d+)%$/);
-      if (percentMatch && currentStudent) {
-        currentStudent.percentage = parseInt(percentMatch[1]);
-        // We have all data for this student, add to array
-        students.push(currentStudent);
-        currentStudent = null;
-        continue;
-      }
-    }
-
-    // Add last student if not already added
-    if (currentStudent && currentStudent.email) {
-      students.push(currentStudent);
+      students.push({
+        status,
+        email,
+        completed: parseInt(progressMatch[1]),
+        total: parseInt(progressMatch[2]),
+        lastThreeDays: parseInt(lastThreeDays),
+        percentage: parseInt(percentMatch[1])
+      });
     }
 
     console.log('TinkrParser: Parsed students:', students.length);
