@@ -59,7 +59,7 @@ const MarkMissingTinkrUI = {
       <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
         <div style="display: flex; align-items: center; gap: 10px;">
           <label style="font-size: 14px; color: #666; min-width: 200px;">
-            Lubatud puuduolevaid tunde (kokku):
+            Allowed missing Lessons (total):
           </label>
           <input
             id="tinkr-allowed-missing-input"
@@ -76,12 +76,12 @@ const MarkMissingTinkrUI = {
             "
           />
           <span style="font-size: 13px; color: #999;">
-            (kokku - X tundi)
+            (total - X Lessons)
           </span>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
           <label style="font-size: 14px; color: #666; min-width: 200px;">
-            Min tunde viimase 3 päeva:
+            Min Lessons last 3 days:
           </label>
           <input
             id="tinkr-min-recent-input"
@@ -98,7 +98,7 @@ const MarkMissingTinkrUI = {
             "
           />
           <span style="font-size: 13px; color: #999;">
-            (vähemalt X tundi)
+            (at least X Lessons)
           </span>
         </div>
       </div>
