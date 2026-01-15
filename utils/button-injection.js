@@ -23,13 +23,17 @@ const ButtonInjection = {
 
       // Clear cell and inject all buttons
       this.injectAllButtons(massGradeCell);
-    }, 1000);
+    }, 200);
   },
 
   // Inject all registered buttons
   injectAllButtons(massGradeCell) {
     // Clear the cell
     massGradeCell.innerHTML = '';
+
+    // Create wrapper with gap
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display: flex; gap: 8px; flex-wrap: wrap;';
 
     // Create and append each button
     this.buttons.forEach(config => {
@@ -39,9 +43,10 @@ const ButtonInjection = {
       button.textContent = config.text;
       button.onclick = config.onClick;
 
-      massGradeCell.appendChild(button);
+      wrapper.appendChild(button);
     });
 
+    massGradeCell.appendChild(wrapper);
     console.log(`ButtonInjection: Injected ${this.buttons.length} buttons`);
   },
 

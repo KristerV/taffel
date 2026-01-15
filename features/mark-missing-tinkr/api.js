@@ -65,7 +65,8 @@ const MarkMissingTinkrAPI = {
       skipped: 0,
       notFound: [],           // Tinkr students to mark that weren't found in Tahvel
       notInTinkr: [],         // Tahvel students not found in Tinkr at all
-      details: []
+      details: [],
+      allMatches: []          // All Tahvel students with their match info
     };
 
     console.log('MarkMissingTinkrAPI: Starting to match students...');
@@ -73,6 +74,25 @@ const MarkMissingTinkrAPI = {
 
     // Match each Tahvel student with Tinkr data
     for (const tahvelStudent of tahvelStudents) {
+      // Get normalized name for display
+      const nameWithoutGroup = tahvelStudent.name.split(',')[0].trim();
+      const normalizedName = TinkrMatcher.normalize(nameWithoutGroup);
+
+      // Find matching Tinkr student (in ALL tinkr students, not just to-mark)
+      const tinkrMatch = TinkrMatcher.findTinkrStudent(
+        tahvelStudent.name,
+        tinkrStudents
+      );
+
+      // Track match for all students list
+      results.allMatches.push({
+        tahvelName: tahvelStudent.name,
+        tahvelShortname: normalizedName,
+        tinkrEmail: tinkrMatch ? tinkrMatch.tinkrStudent.email : null,
+        tinkrShortname: tinkrMatch ? TinkrMatcher.extractNameFromEmail(tinkrMatch.tinkrStudent.email) : null,
+        matched: !!tinkrMatch
+      });
+
       // Find matching Tinkr student (in students to mark)
       const match = TinkrMatcher.findTinkrStudent(
         tahvelStudent.name,
@@ -116,53 +136,45 @@ const MarkMissingTinkrAPI = {
 
         // Small delay between clicks
         await new Promise(resolve => setTimeout(resolve, 50));
-      } else {
-        // Check if student is in Tinkr at all (not just in the "to mark" list)
-        const inTinkrAtAll = TinkrMatcher.findTinkrStudent(
-          tahvelStudent.name,
-          tinkrStudents
-        );
+      } else if (!tinkrMatch) {
+        // Student not in Tinkr at all - mark as missing
+        const marked = this.markStudentMissing(tahvelStudent);
 
-        if (!inTinkrAtAll) {
-          // Student not in Tinkr at all - mark as missing
-          const marked = this.markStudentMissing(tahvelStudent);
-
-          if (marked) {
-            results.marked++;
-            results.details.push({
-              tahvelName: tahvelStudent.name,
-              tinkrEmail: null,
-              progress: null,
-              lastThreeDays: null,
-              matchMethod: 'not_in_tinkr',
-              similarity: null,
-              action: 'marked'
-            });
-          } else {
-            results.skipped++;
-            results.details.push({
-              tahvelName: tahvelStudent.name,
-              tinkrEmail: null,
-              progress: null,
-              lastThreeDays: null,
-              matchMethod: 'not_in_tinkr',
-              similarity: null,
-              action: 'already_marked'
-            });
-          }
-
-          results.notInTinkr.push({
-            name: tahvelStudent.name
+        if (marked) {
+          results.marked++;
+          results.details.push({
+            tahvelName: tahvelStudent.name,
+            tinkrEmail: null,
+            progress: null,
+            lastThreeDays: null,
+            matchMethod: 'not_in_tinkr',
+            similarity: null,
+            action: 'marked'
           });
-
-          // Progress callback
-          if (onProgress) {
-            onProgress(results);
-          }
-
-          // Small delay between clicks
-          await new Promise(resolve => setTimeout(resolve, 50));
+        } else {
+          results.skipped++;
+          results.details.push({
+            tahvelName: tahvelStudent.name,
+            tinkrEmail: null,
+            progress: null,
+            lastThreeDays: null,
+            matchMethod: 'not_in_tinkr',
+            similarity: null,
+            action: 'already_marked'
+          });
         }
+
+        results.notInTinkr.push({
+          name: tahvelStudent.name
+        });
+
+        // Progress callback
+        if (onProgress) {
+          onProgress(results);
+        }
+
+        // Small delay between clicks
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
     }
 

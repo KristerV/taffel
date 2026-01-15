@@ -33,11 +33,9 @@
         "features/mark-missing-tinkr/matcher.js",
         "features/mark-missing-tinkr/parser.js",
         "features/mark-missing-tinkr/api.js",
-        "features/mark-missing-tinkr/ui.js",
-        "features/mark-missing-tinkr/index.js",
         "features/paste-grades/parser.js",
-        "features/paste-grades/ui.js",
-        "features/paste-grades/index.js",
+        "features/tinkr/ui.js",
+        "features/tinkr/index.js",
         "features/navbar-buttons/ui.js",
         "features/navbar-buttons/index.js",
         "content.js"

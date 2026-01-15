@@ -27,14 +27,9 @@
       init: () => MarkAllMissing.init()
     },
     {
-      name: 'mark-missing-tinkr',
+      name: 'tinkr',
       shouldInit: () => TahvelUtils.isJournalEditPage(),
-      init: () => MarkMissingTinkr.init()
-    },
-    {
-      name: 'paste-grades',
-      shouldInit: () => TahvelUtils.isJournalEditPage(),
-      init: () => PasteGrades.init()
+      init: () => Tinkr.init()
     }
   ];
 

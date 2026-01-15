@@ -219,29 +219,77 @@ const MarkMissingTinkrUI = {
 
   // Show results summary
   showResults(results) {
-    const message = `
-Kokku: ${results.total} õpilast Tahvelis
-Sobivad: ${results.matched} leitud Tinkrist
-Märgitud: ${results.marked} uut
-Juba märgitud: ${results.skipped}
-${results.notInTinkr.length > 0 ? `\nTahvelis aga mitte Tinkris: ${results.notInTinkr.length}` : ''}
-${results.notFound.length > 0 ? `\nTinkris aga mitte Tahvelis: ${results.notFound.length}` : ''}
-    `.trim();
+    const statusDiv = document.getElementById('tinkr-status');
+    if (!statusDiv) return;
 
-    this.showStatus(message, 'success');
+    // Build HTML for results
+    let html = `
+      <div style="margin-bottom: 8px;">
+        <strong>Tulemused:</strong><br>
+        Kokku: ${results.total} õpilast Tahvelis<br>
+        Märgitud puudujaks: ${results.marked}<br>
+        Juba märgitud: ${results.skipped}
+      </div>
+    `;
+
+    // Show all matches log
+    if (results.allMatches && results.allMatches.length > 0) {
+      html += `
+        <div style="margin-top: 10px; padding: 8px; background: #f5f5f5; border-radius: 4px;">
+          <strong>Kõik õpilased:</strong>
+          <table style="width: 100%; margin-top: 8px; font-size: 11px; font-family: monospace; border-collapse: collapse;">
+            <tr style="text-align: left; border-bottom: 1px solid #ddd;">
+              <th style="padding: 4px;">Nimi</th>
+              <th style="padding: 4px;">Lühend</th>
+              <th style="padding: 4px;">Tinkr lühend</th>
+            </tr>
+            ${results.allMatches.map(m => `
+              <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 4px;">${m.tahvelName.split(',')[0].trim()}</td>
+                <td style="padding: 4px;">${m.tahvelShortname}</td>
+                <td style="padding: 4px;">${m.matched
+                  ? m.tinkrShortname
+                  : '<span style="color: #d32f2f; font-weight: bold;">[no match]</span>'
+                }</td>
+              </tr>
+            `).join('')}
+          </table>
+        </div>
+      `;
+    }
+
+    // Show students not in Tahvel (from Tinkr)
+    if (results.notFound.length > 0) {
+      html += `
+        <div style="margin-top: 10px; padding: 8px; background: #e3f2fd; border-radius: 4px;">
+          <strong style="color: #1976d2;">Tinkris, aga mitte Tahvelis (${results.notFound.length}):</strong>
+          <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+            ${results.notFound.map(s => `<li>${s.email} (${s.progress})</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    }
+
+    statusDiv.style.display = 'block';
+    statusDiv.style.background = '#e8f5e9';
+    statusDiv.style.color = '#333';
+    statusDiv.style.maxHeight = '400px';
+    statusDiv.style.overflowY = 'auto';
+    statusDiv.innerHTML = html;
+
+    // Change cancel button to "Sulge"
+    const cancelBtn = document.getElementById('tinkr-cancel-btn');
+    if (cancelBtn) {
+      cancelBtn.textContent = 'Sulge';
+    }
+
+    // Hide submit button
+    const submitBtn = document.getElementById('tinkr-submit-btn');
+    if (submitBtn) {
+      submitBtn.style.display = 'none';
+    }
 
     // Log details to console
     console.log('Tinkr marking results:', results);
-    if (results.notInTinkr.length > 0) {
-      console.log('Students in Tahvel but not in Tinkr:', results.notInTinkr);
-    }
-    if (results.notFound.length > 0) {
-      console.log('Students in Tinkr but not in Tahvel:', results.notFound);
-    }
-
-    // Close popup after 3 seconds
-    setTimeout(() => {
-      this.closePopup();
-    }, 3000);
   }
 };
