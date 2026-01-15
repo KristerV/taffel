@@ -2,15 +2,22 @@
 const ButtonInjection = {
   // Registry of buttons to inject
   buttons: [],
+  initialized: false,
 
   // Register a new button
   registerButton(config) {
     // config = { id, text, className, onClick }
+    // Prevent duplicates
+    if (this.buttons.some(btn => btn.id === config.id)) return;
     this.buttons.push(config);
   },
 
   // Poll for modal and inject all registered buttons
   init() {
+    // Prevent multiple intervals
+    if (this.initialized) return;
+    this.initialized = true;
+
     setInterval(() => {
       const massGradeCell = document.querySelector('td.mass-grade[colspan="3"]');
 

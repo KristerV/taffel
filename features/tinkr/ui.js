@@ -47,6 +47,12 @@ const TinkrUI = {
           font-size: 14px;
           text-align: left;
         ">Eksami hinded</button>
+        <button id="tinkr-menu-lesson-grades" class="tahvel-brand-button" style="
+          width: 100%;
+          padding: 12px 16px;
+          font-size: 14px;
+          text-align: left;
+        ">Harjutuste hinded</button>
       </div>
     `;
 
@@ -62,6 +68,11 @@ const TinkrUI = {
     document.getElementById('tinkr-menu-grades').onclick = () => {
       this.closePopup();
       this.showToolPopup('grades');
+    };
+
+    document.getElementById('tinkr-menu-lesson-grades').onclick = () => {
+      this.closePopup();
+      this.showToolPopup('lesson-grades');
     };
 
     overlay.onclick = (e) => {
@@ -104,8 +115,18 @@ const TinkrUI = {
       flex-direction: column;
     `;
 
-    const title = mode === 'missing' ? 'Märgi puudujad' : 'Eksami hinded';
-    const submitText = mode === 'missing' ? 'Märgi puudujaks' : 'Sisesta hinded';
+    const titles = {
+      'missing': 'Märgi puudujad',
+      'grades': 'Eksami hinded',
+      'lesson-grades': 'Harjutuste hinded'
+    };
+    const submitTexts = {
+      'missing': 'Märgi puudujaks',
+      'grades': 'Sisesta hinded',
+      'lesson-grades': 'Sisesta hinded'
+    };
+    const title = titles[mode] || mode;
+    const submitText = submitTexts[mode] || 'Käivita';
 
     let contentHtml = '';
     if (mode === 'missing') {
@@ -177,6 +198,30 @@ const TinkrUI = {
           Hinded: 1, 2, 3, 4, 5, A, MA, X
         </p>
       `;
+    } else if (mode === 'lesson-grades') {
+      contentHtml = `
+        <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">
+          Kopeeri Tinkr õpilaste nimekiri siia:
+        </p>
+        <textarea
+          id="tinkr-data-textarea"
+          placeholder="Status    Email    Progress    Last 3 Days    Percentage&#10;Offline    martin.veeberg@tptlive.ee    223/224    25    100%&#10;..."
+          style="
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            resize: vertical;
+            box-sizing: border-box;
+          "
+        ></textarea>
+        <p style="margin: 10px 0 0 0; font-size: 12px; color: #999;">
+          90%+ → 5, 75%+ → 4, 50%+ → 3, &lt;50% → X
+        </p>
+      `;
     }
 
     popup.innerHTML = `
@@ -245,6 +290,8 @@ const TinkrUI = {
       this.processMissing(data);
     } else if (this.currentMode === 'grades') {
       this.processGrades(data);
+    } else if (this.currentMode === 'lesson-grades') {
+      this.processLessonGrades(data);
     }
   },
 
@@ -375,6 +422,134 @@ const TinkrUI = {
 
     } catch (error) {
       console.error('Error processing grades:', error);
+      this.showStatus(`Viga: ${error.message}`, 'error');
+      this.setSubmitEnabled(true);
+    }
+  },
+
+  processLessonGrades(tinkrText) {
+    try {
+      this.setSubmitEnabled(false);
+      this.showStatus('Töötlen...', 'info');
+
+      // Parse Tinkr data
+      const students = TinkrParser.parse(tinkrText);
+
+      if (students.length === 0) {
+        this.showStatus('Ei leidnud õpilasi', 'error');
+        this.setSubmitEnabled(true);
+        return;
+      }
+
+      // Convert percentage to grade
+      const percentageToGrade = (pct) => {
+        if (pct >= 90) return '5';
+        if (pct >= 75) return '4';
+        if (pct >= 50) return '3';
+        return 'X';
+      };
+
+      // Get student rows from the table
+      const rows = document.querySelectorAll('tbody tr');
+      let matched = 0;
+      let notFound = [];
+      let gradeResults = [];
+
+      // For each Tinkr student, find matching Tahvel student and set grade
+      for (const student of students) {
+        const grade = percentageToGrade(student.percentage);
+        let found = false;
+
+        for (const row of rows) {
+          const nameCell = row.querySelector('.student-cell span span');
+          if (!nameCell) continue;
+
+          const studentName = nameCell.textContent.trim();
+
+          // Use TinkrMatcher for fuzzy matching
+          const matchResult = TinkrMatcher.matchStudent(studentName, student.email, 80);
+
+          if (matchResult.matched) {
+            // Find the grade select in this row
+            const select = row.querySelector('select.grade-select');
+            if (select) {
+              const selectValue = GradeParser.getSelectValue(grade);
+              if (selectValue) {
+                select.value = selectValue;
+                // Trigger change event for Angular
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                matched++;
+                found = true;
+                gradeResults.push({
+                  name: studentName,
+                  email: student.email,
+                  percentage: student.percentage,
+                  grade: grade
+                });
+                console.log(`Set grade ${grade} for ${studentName} (${student.email}, ${student.percentage}%)`);
+              }
+            }
+            break;
+          }
+        }
+
+        if (!found) {
+          notFound.push({ email: student.email, percentage: student.percentage, grade: grade });
+        }
+      }
+
+      // Show results
+      let html = `
+        <div style="margin-bottom: 8px;">
+          <strong>Tulemused:</strong><br>
+          Sisestatud: ${matched}/${students.length}
+        </div>
+      `;
+
+      // Show grade assignments
+      if (gradeResults.length > 0) {
+        html += `
+          <div style="margin-top: 10px; padding: 8px; background: #f5f5f5; border-radius: 4px;">
+            <strong>Hinded:</strong>
+            <table style="width: 100%; margin-top: 8px; font-size: 11px; font-family: monospace; border-collapse: collapse;">
+              <tr style="text-align: left; border-bottom: 1px solid #ddd;">
+                <th style="padding: 4px;">Nimi</th>
+                <th style="padding: 4px;">%</th>
+                <th style="padding: 4px;">Hinne</th>
+              </tr>
+              ${gradeResults.map(r => `
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 4px;">${r.name.split(',')[0].trim()}</td>
+                  <td style="padding: 4px;">${r.percentage}%</td>
+                  <td style="padding: 4px; font-weight: bold;">${r.grade}</td>
+                </tr>
+              `).join('')}
+            </table>
+          </div>
+        `;
+      }
+
+      if (notFound.length > 0) {
+        html += `
+          <div style="margin-top: 10px; padding: 8px; background: #fff3e0; border-radius: 4px;">
+            <strong style="color: #f57c00;">Ei leitud Tahvelist (${notFound.length}):</strong>
+            <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+              ${notFound.map(s => `<li>${s.email} (${s.percentage}% → ${s.grade})</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }
+
+      const statusDiv = document.getElementById('tinkr-status');
+      statusDiv.style.display = 'block';
+      statusDiv.style.background = matched > 0 ? '#e8f5e9' : '#ffebee';
+      statusDiv.style.color = '#333';
+      statusDiv.innerHTML = html;
+
+      this.showCloseButton();
+
+    } catch (error) {
+      console.error('Error processing lesson grades:', error);
       this.showStatus(`Viga: ${error.message}`, 'error');
       this.setSubmitEnabled(true);
     }
