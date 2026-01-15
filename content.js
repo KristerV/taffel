@@ -30,8 +30,12 @@
       name: 'mark-missing-tinkr',
       shouldInit: () => TahvelUtils.isJournalEditPage(),
       init: () => MarkMissingTinkr.init()
+    },
+    {
+      name: 'paste-grades',
+      shouldInit: () => TahvelUtils.isJournalEditPage(),
+      init: () => PasteGrades.init()
     }
-    // Add more features here as they are developed
   ];
 
   // Initialize all features
