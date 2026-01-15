@@ -48,13 +48,13 @@ const MarkMissingTinkrAPI = {
   },
 
   // Match Tahvel students with Tinkr students and mark missing
-  async matchAndMarkStudents(tinkrStudents, allowedMissing, minRecent, onProgress) {
+  async matchAndMarkStudents(tinkrStudents, minPercentage, minRecent, onProgress) {
     const tahvelStudents = await this.getTahvelStudents();
     console.log('MarkMissingTinkrAPI: Tahvel students:', tahvelStudents.length);
     console.log('MarkMissingTinkrAPI: First 3 Tahvel students:', tahvelStudents.slice(0, 3).map(s => s.name));
 
     // Filter Tinkr students who should be marked missing
-    const tinkrToMark = TinkrParser.filterShouldBeMarkedMissing(tinkrStudents, allowedMissing, minRecent);
+    const tinkrToMark = TinkrParser.filterShouldBeMarkedMissing(tinkrStudents, minPercentage, minRecent);
     console.log('MarkMissingTinkrAPI: Tinkr students to mark:', tinkrToMark.length);
     console.log('MarkMissingTinkrAPI: Tinkr emails to mark:', tinkrToMark.map(s => s.email));
 

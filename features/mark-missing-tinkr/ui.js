@@ -59,14 +59,14 @@ const MarkMissingTinkrUI = {
       <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
         <div style="display: flex; align-items: center; gap: 10px;">
           <label style="font-size: 14px; color: #666; min-width: 200px;">
-            Allowed missing Lessons (total):
+            Min completion %:
           </label>
           <input
-            id="tinkr-allowed-missing-input"
+            id="tinkr-min-percentage-input"
             type="number"
-            value="3"
+            value="90"
             min="0"
-            max="50"
+            max="100"
             style="
               width: 60px;
               padding: 6px 10px;
@@ -76,7 +76,7 @@ const MarkMissingTinkrUI = {
             "
           />
           <span style="font-size: 13px; color: #999;">
-            (total - X Lessons)
+            (below this = missing)
           </span>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -86,7 +86,7 @@ const MarkMissingTinkrUI = {
           <input
             id="tinkr-min-recent-input"
             type="number"
-            value="1"
+            value="5"
             min="0"
             max="50"
             style="
@@ -145,18 +145,18 @@ const MarkMissingTinkrUI = {
 
     // Event listeners
     const textarea = document.getElementById('tinkr-data-textarea');
-    const allowedMissingInput = document.getElementById('tinkr-allowed-missing-input');
+    const minPercentageInput = document.getElementById('tinkr-min-percentage-input');
     const minRecentInput = document.getElementById('tinkr-min-recent-input');
     const submitBtn = document.getElementById('tinkr-submit-btn');
     const cancelBtn = document.getElementById('tinkr-cancel-btn');
 
     submitBtn.onclick = () => {
       const data = textarea.value.trim();
-      const allowedMissing = parseInt(allowedMissingInput.value) || 3;
-      const minRecent = parseInt(minRecentInput.value) || 1;
+      const minPercentage = parseInt(minPercentageInput.value) || 90;
+      const minRecent = parseInt(minRecentInput.value) || 5;
 
       if (data) {
-        onSubmit(data, allowedMissing, minRecent);
+        onSubmit(data, minPercentage, minRecent);
       } else {
         this.showStatus('Palun sisesta Tinkr andmed', 'error');
       }

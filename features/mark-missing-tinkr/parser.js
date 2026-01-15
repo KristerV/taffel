@@ -109,9 +109,9 @@ const TinkrParser = {
   // Filter students who should be marked missing
   // Rules:
   // 1. Not online
-  // 2. Progress < (total - allowedMissing) lessons AND lastThreeDays < minRecentLessons
-  filterShouldBeMarkedMissing(students, allowedMissing = 3, minRecentLessons = 1) {
-    console.log(`TinkrParser: Filtering students to mark missing (allowed missing: ${allowedMissing}, min recent: ${minRecentLessons})`);
+  // 2. Percentage < minPercentage AND lastThreeDays < minRecentLessons
+  filterShouldBeMarkedMissing(students, minPercentage = 90, minRecentLessons = 5) {
+    console.log(`TinkrParser: Filtering students to mark missing (min percentage: ${minPercentage}%, min recent: ${minRecentLessons})`);
     const filtered = students.filter(student => {
       // Must be offline
       if (student.status === 'Online') {
@@ -131,16 +131,16 @@ const TinkrParser = {
         return false;
       }
 
-      // Check overall progress
-      const requiredLessons = student.total - allowedMissing;
-      const overallBad = student.completed < requiredLessons;
+      // Check overall progress (use percentage from Tinkr data, or calculate from completed/total)
+      const percentage = student.percentage !== undefined ? student.percentage : Math.round((student.completed / student.total) * 100);
+      const overallBad = percentage < minPercentage;
 
       // Check recent work
       const recentBad = student.lastThreeDays < minRecentLessons;
 
       // Mark if BOTH overall AND recent are bad
       const shouldMark = overallBad && recentBad;
-      console.log(`  - ${student.email}: ${student.completed}/${student.total} (need: ${requiredLessons}), Last 3 Days: ${student.lastThreeDays} (need: ${minRecentLessons}) -> ${shouldMark ? 'MARK' : 'SKIP'}`);
+      console.log(`  - ${student.email}: ${percentage}% (need: ${minPercentage}%), Last 3 Days: ${student.lastThreeDays} (need: ${minRecentLessons}) -> ${shouldMark ? 'MARK' : 'SKIP'}`);
       return shouldMark;
     });
 
