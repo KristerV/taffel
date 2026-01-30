@@ -37,7 +37,6 @@
   function initializeFeatures() {
     features.forEach(feature => {
       if (feature.shouldInit()) {
-        console.log(`Initializing feature: ${feature.name}`);
         feature.init();
       }
     });
