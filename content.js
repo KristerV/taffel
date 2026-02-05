@@ -30,6 +30,11 @@
       name: 'tinkr',
       shouldInit: () => TahvelUtils.isJournalEditPage(),
       init: () => Tinkr.init()
+    },
+    {
+      name: 'final-grade',
+      shouldInit: () => TahvelUtils.isJournalEditPage(),
+      init: () => FinalGrade.init()
     }
   ];
 

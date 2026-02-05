@@ -38,6 +38,8 @@
         "features/tinkr/index.js",
         "features/navbar-buttons/ui.js",
         "features/navbar-buttons/index.js",
+        "features/final-grade/calculator.js",
+        "features/final-grade/index.js",
         "content.js"
       ],
       "css": ["styles.css"]
