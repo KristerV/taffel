@@ -1,5 +1,14 @@
 // Parser for pasted grade data (email + grade pairs)
 const GradeParser = {
+  // Grade ranking for comparing grades (higher = better)
+  GRADE_RANK: { '5': 8, '4': 7, '3': 6, 'A': 5, '2': 4, '1': 3, 'MA': 2, 'X': 1 },
+
+  isBetterGrade(newGrade, existingGrade) {
+    const newRank = this.GRADE_RANK[newGrade.toUpperCase()] || 0;
+    const existingRank = this.GRADE_RANK[existingGrade.toUpperCase()] || 0;
+    return newRank > existingRank;
+  },
+
   // Grade value mapping for the select dropdown
   GRADE_MAP: {
     '1': '1: Object',

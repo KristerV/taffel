@@ -356,40 +356,27 @@ const TinkrUI = {
       const rows = document.querySelectorAll('tbody tr');
       let matched = 0;
       let notFound = [];
+      const gradedRows = new Map(); // row → grade, to keep best grade on duplicates
 
       // For each grade entry, find matching student and set grade
       for (const { email, grade } of gradeData) {
-        let found = false;
+        const row = this.findMatchingRow(rows, email);
 
-        for (const row of rows) {
-          const nameCell = row.querySelector('.student-cell span span');
-          if (!nameCell) continue;
-
-          const studentName = nameCell.textContent.trim();
-
-          // Use TinkrMatcher for fuzzy matching
-          const matchResult = TinkrMatcher.matchStudent(studentName, email, 80);
-
-          if (matchResult.matched) {
-            // Find the grade select in this row
-            const select = row.querySelector('select.grade-select');
-            if (select) {
-              const selectValue = GradeParser.getSelectValue(grade);
-              if (selectValue) {
-                select.value = selectValue;
-                // Trigger change event for Angular
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-                matched++;
-                found = true;
-                console.log(`Set grade ${grade} for ${studentName} (${email})`);
-              }
-            }
-            break;
-          }
+        if (!row) {
+          notFound.push(email);
+          continue;
         }
 
-        if (!found) {
-          notFound.push(email);
+        const existing = gradedRows.get(row);
+        if (existing && !GradeParser.isBetterGrade(grade, existing)) {
+          console.log(`Skipping grade ${grade} for ${email}, keeping ${existing}`);
+          continue;
+        }
+
+        if (this.applyGradeToRow(row, grade)) {
+          if (!existing) matched++;
+          gradedRows.set(row, grade);
+          console.log(`${existing ? `Upgrading grade ${existing} →` : 'Set grade'} ${grade} for ${email}`);
         }
       }
 
@@ -454,47 +441,37 @@ const TinkrUI = {
       let matched = 0;
       let notFound = [];
       let gradeResults = [];
+      const gradedRows = new Map(); // row → { grade, resultIndex }, to keep best grade on duplicates
 
       // For each Tinkr student, find matching Tahvel student and set grade
       for (const student of students) {
         const grade = percentageToGrade(student.percentage);
-        let found = false;
+        const row = this.findMatchingRow(rows, student.email);
 
-        for (const row of rows) {
-          const nameCell = row.querySelector('.student-cell span span');
-          if (!nameCell) continue;
-
-          const studentName = nameCell.textContent.trim();
-
-          // Use TinkrMatcher for fuzzy matching
-          const matchResult = TinkrMatcher.matchStudent(studentName, student.email, 80);
-
-          if (matchResult.matched) {
-            // Find the grade select in this row
-            const select = row.querySelector('select.grade-select');
-            if (select) {
-              const selectValue = GradeParser.getSelectValue(grade);
-              if (selectValue) {
-                select.value = selectValue;
-                // Trigger change event for Angular
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-                matched++;
-                found = true;
-                gradeResults.push({
-                  name: studentName,
-                  email: student.email,
-                  percentage: student.percentage,
-                  grade: grade
-                });
-                console.log(`Set grade ${grade} for ${studentName} (${student.email}, ${student.percentage}%)`);
-              }
-            }
-            break;
-          }
+        if (!row) {
+          notFound.push({ email: student.email, percentage: student.percentage, grade });
+          continue;
         }
 
-        if (!found) {
-          notFound.push({ email: student.email, percentage: student.percentage, grade: grade });
+        const existing = gradedRows.get(row);
+        if (existing && !GradeParser.isBetterGrade(grade, existing.grade)) {
+          console.log(`Skipping grade ${grade} for ${student.email} (${student.percentage}%), keeping ${existing.grade}`);
+          continue;
+        }
+
+        if (this.applyGradeToRow(row, grade)) {
+          const studentName = row.querySelector('.student-cell span span').textContent.trim();
+          const resultEntry = { name: studentName, email: student.email, percentage: student.percentage, grade };
+
+          if (existing) {
+            gradeResults[existing.resultIndex] = resultEntry;
+            gradedRows.set(row, { grade, resultIndex: existing.resultIndex });
+          } else {
+            gradedRows.set(row, { grade, resultIndex: gradeResults.length });
+            gradeResults.push(resultEntry);
+            matched++;
+          }
+          console.log(`${existing ? `Upgrading grade ${existing.grade} →` : 'Set grade'} ${grade} for ${studentName} (${student.email}, ${student.percentage}%)`);
         }
       }
 
@@ -624,6 +601,32 @@ const TinkrUI = {
 
     const modeSelect = document.getElementById('tinkr-mode-select');
     if (modeSelect) modeSelect.disabled = true;
+  },
+
+  // Find the table row whose student name matches the given email via fuzzy matching.
+  findMatchingRow(rows, email) {
+    for (const row of rows) {
+      const nameCell = row.querySelector('.student-cell span span');
+      if (!nameCell) continue;
+
+      const studentName = nameCell.textContent.trim();
+      const matchResult = TinkrMatcher.matchStudent(studentName, email, 80);
+      if (matchResult.matched) return row;
+    }
+    return null;
+  },
+
+  // Apply a grade to a table row's select element. Returns true if successful.
+  applyGradeToRow(row, grade) {
+    const select = row.querySelector('select.grade-select');
+    if (!select) return false;
+
+    const selectValue = GradeParser.getSelectValue(grade);
+    if (!selectValue) return false;
+
+    select.value = selectValue;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    return true;
   },
 
   closePopup() {
