@@ -7,6 +7,11 @@
   // Array of features to initialize
   const features = [
     {
+      name: 'auto-login',
+      shouldInit: () => true,
+      init: () => AutoLogin.init()
+    },
+    {
       name: 'navbar-buttons',
       shouldInit: () => true, // Always show navbar buttons
       init: () => NavbarButtons.init()
